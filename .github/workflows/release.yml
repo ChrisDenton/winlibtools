@@ -1,0 +1,26 @@
+on: workflow_dispatch
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        os:
+          - name: ubuntu
+            runner: ubuntu-latest
+          - name: windows
+            runner: windows-latest
+          - name: macos
+            runner: macos-latest
+    runs-on: ${{ matrix.os.runner }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build release
+      run: cargo build --release --verbose
+    - name: Upload release
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os.name }}
+        path: |
+          target/release/winlib
+          target/release/winlib.exe
+          target/release/winlib.pdb
