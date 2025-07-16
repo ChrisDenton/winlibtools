@@ -1,0 +1,19 @@
+# rename to mutlib
+
+[package]
+name = "winlib"
+version = "0.1.0"
+edition = "2024"
+description = "tools for creating, inspecting and modifying windows lib files"
+documentation = "https://docs.rs/winlib/0.1.0/winlib"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/ChrisDenton/winlibtools"
+
+[dependencies]
+ar_archive_writer = "0.4.2"
+lexopt = "0.3.1"
+object = "0.37.1"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
