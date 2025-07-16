@@ -16,3 +16,11 @@ Options:
 Example:
         winlib create newlib.lib --from oldlib.lib --remove-idata --keep-remove import.lib
 ```
+
+## Download
+
+Either download from the [Releases](https://github.com/ChrisDenton/winlibtools/releases) page or install using `cargo`.
+
+```
+cargo install winlib
+```
