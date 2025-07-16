@@ -12,7 +12,11 @@ repository = "https://github.com/ChrisDenton/winlibtools"
 [dependencies]
 ar_archive_writer = "0.4.2"
 lexopt = "0.3.1"
-object = "0.37.1"
+
+[dependencies.object]
+version = "0.37.1"
+default-features = false
+features = ["read_core", "archive", "coff"]
 
 [profile.release]
 lto = "thin"
