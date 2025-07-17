@@ -104,11 +104,16 @@ fn create_lib(
             }
         }
         let name = String::from_utf8_lossy(member.name());
-        let new_member = ar_archive_writer::NewArchiveMember::new(
-            data,
-            &ar_archive_writer::DEFAULT_OBJECT_READER,
-            name.into(),
-        );
+
+        let new_member = ar_archive_writer::NewArchiveMember {
+            buf: Box::new(data),
+            object_reader: &ar_archive_writer::DEFAULT_OBJECT_READER,
+            member_name: name.into(),
+            mtime: member.date().unwrap_or(0),
+            uid: member.uid().unwrap_or(0) as u32,
+            gid: member.gid().unwrap_or(0) as u32,
+            perms: member.mode().unwrap_or(0o644) as u32,
+        };
         if exclude {
             if extracted_lib.is_some() {
                 extracted_members.push(new_member);
