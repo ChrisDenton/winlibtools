@@ -11,8 +11,8 @@ Usage:
 
 Create Options:
         --from <PATH>           The new lib will contain members from the old lib at <PATH>.
-        --exclude <OFFSET>      Remove the member at the given offset
-        --exclude-idata         Remove members containing .idata sections.
+        --exclude <OFFSET>      Exclude the member at the given offset
+        --exclude-idata         Exclude members containing .idata sections.
         --save-excluded <PATH>  Store the excluded members in a separate library at <PATH>.
 
 Examples:

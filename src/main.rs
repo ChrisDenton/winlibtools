@@ -290,8 +290,8 @@ fn print_help() {
 
 Create Options:
 \t--from <PATH>        \tThe new lib will contain members from the old lib at <PATH>.
-\t--exclude <OFFSET>    \tRemove the member at the given offset
-\t--exclude-idata       \tRemove members containing .idata sections.
+\t--exclude <OFFSET>    \tExclude the member at the given offset
+\t--exclude-idata       \tExclude members containing .idata sections.
 \t--save-excluded <PATH>\tStore the excluded members in a separate library at <PATH>.
 
 Examples:
