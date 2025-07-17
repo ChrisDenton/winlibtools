@@ -43,7 +43,7 @@ dependencies = [
 
 [[package]]
 name = "winlib"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "ar_archive_writer",
  "lexopt",
