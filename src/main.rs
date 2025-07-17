@@ -28,9 +28,9 @@ impl fmt::Display for WinlibError {
 impl Error for WinlibError {}
 
 struct CreateOptions {
-    remove_idata: bool,
-    remove_offsets: Vec<u32>,
-    keep_removed: Option<OsString>,
+    exclude_idata: bool,
+    exclude_offsets: Vec<u32>,
+    save_excluded: Option<OsString>,
 }
 
 fn create_lib(
@@ -38,7 +38,7 @@ fn create_lib(
     out_lib: &OsStr,
     options: &CreateOptions,
 ) -> Result<(), WinlibError> {
-    let extracted_lib = options.keep_removed.as_deref();
+    let extracted_lib = options.save_excluded.as_deref();
     let data = fs::read(&lib_path).map_err(|e| WinlibError::IoError {
         msg: format!("cannot read {}", lib_path.display()),
         cause: e,
@@ -64,10 +64,10 @@ fn create_lib(
             ),
             cause: e,
         })?;
-        let mut remove = false;
-        if options.remove_offsets.contains(&(member.file_range().0 as u32)) {
-            remove = true;
-        } else if options.remove_idata {
+        let mut exclude = false;
+        if options.exclude_offsets.contains(&(member.file_range().0 as u32)) {
+            exclude = true;
+        } else if options.exclude_idata {
             match CoffFile::<_, ImageFileHeader>::parse(&*data) {
                 Ok(file) => {
                     let strings = file.coff_symbol_table().strings();
@@ -81,14 +81,14 @@ fn create_lib(
                             cause: e,
                         })?;
                         if name.starts_with(b".idata$") {
-                            remove = true;
+                            exclude = true;
                             break;
                         }
                     }
                 }
                 Err(e) => {
                     if let Ok(_) = ImportFile::parse(&*data) {
-                        remove = true;
+                        exclude = true;
                     } else {
                         // maybe we should just warn here?
                         return Err(WinlibError::ObjectError {
@@ -109,7 +109,7 @@ fn create_lib(
             &ar_archive_writer::DEFAULT_OBJECT_READER,
             name.into(),
         );
-        if remove {
+        if exclude {
             if extracted_lib.is_some() {
                 extracted_members.push(new_member);
             }
@@ -195,11 +195,11 @@ enum Command {
 #[derive(Default)]
 struct Options {
     command: Option<Command>,
-    remove_idata: bool,
-    remove_offsets: Vec<u32>,
+    exclude_idata: bool,
+    exclude_offsets: Vec<u32>,
     from_lib: Option<OsString>,
     target_lib: Option<OsString>,
-    keep_removed: Option<OsString>,
+    save_excluded: Option<OsString>,
     help: bool,
 }
 
@@ -235,10 +235,12 @@ fn parse_args() -> Result<Options, lexopt::Error> {
             Long("from") if options.command == Some(Command::Create) => {
                 options.from_lib = Some(parser.value()?);
             }
-            Long("keep-removed") if options.command == Some(Command::Create) => {
-                options.keep_removed = Some(parser.value()?);
+            Long("save-excluded") | Long("keep-removed")
+                if options.command == Some(Command::Create) =>
+            {
+                options.save_excluded = Some(parser.value()?);
             }
-            Long("remove") if options.command == Some(Command::Create) => {
+            Long("exclude") | Long("remove") if options.command == Some(Command::Create) => {
                 let value = parser.value()?;
                 let offset = match value.to_str() {
                     Some(s) => if s.starts_with("0x") {
@@ -257,10 +259,12 @@ fn parse_args() -> Result<Options, lexopt::Error> {
                         continue;
                     }
                 };
-                options.remove_offsets.push(offset);
+                options.exclude_offsets.push(offset);
             }
-            Long("remove-idata") if options.command == Some(Command::Create) => {
-                options.remove_idata = true;
+            Long("exclude-idata") | Long("remove-idata")
+                if options.command == Some(Command::Create) =>
+            {
+                options.exclude_idata = true;
             }
             _ => {
                 if unexpected.is_none() {
@@ -280,19 +284,19 @@ fn print_help() {
     println!(
         "Usage:
 \twinlib list <LIB_PATH>
-\twinlib create <LIB_PATH> --from <PATH> --remove-idata [--keep-removed <PATH>]
+\twinlib create <LIB_PATH> --from <PATH> --exclude-idata [--save-excluded <PATH>]
 
 <LIB_PATH> is the path of the lib to create or inspect.
 
 Create Options:
 \t--from <PATH>        \tThe new lib will contain members from the old lib at <PATH>.
-\t--remove <OFFSET>    \tRemove the member at the given offset
-\t--remove-idata       \tRemove members containing .idata sections.
-\t--keep-removed <PATH>\tStore the removed members in a separate library at <PATH>.
+\t--exclude <OFFSET>    \tRemove the member at the given offset
+\t--exclude-idata       \tRemove members containing .idata sections.
+\t--save-excluded <PATH>\tStore the excluded members in a separate library at <PATH>.
 
 Examples:
 \twinlib list oldlib.lib
-\twinlib create newlib.lib --from oldlib.lib --remove-idata --keep-remove import.lib
+\twinlib create newlib.lib --from oldlib.lib --exclude-idata --save-excluded import.lib
 "
     );
 }
@@ -332,9 +336,9 @@ fn main() -> ExitCode {
                 return failure!("error: no --from lib path provided");
             };
             let options = CreateOptions {
-                remove_offsets: options.remove_offsets,
-                remove_idata: options.remove_idata,
-                keep_removed: options.keep_removed,
+                exclude_offsets: options.exclude_offsets,
+                exclude_idata: options.exclude_idata,
+                save_excluded: options.save_excluded,
             };
             match create_lib(&lib_path, &target_lib, &options) {
                 Ok(_) => return ExitCode::SUCCESS,
