@@ -16,7 +16,7 @@ lexopt = "0.3.1"
 [dependencies.object]
 version = "0.37.1"
 default-features = false
-features = ["read_core", "archive", "coff"]
+features = ["read_core", "archive", "coff", "unaligned"]
 
 [profile.release]
 lto = "thin"
