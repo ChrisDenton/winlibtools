@@ -1,9 +1,9 @@
 [package]
 name = "winlib"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 description = "tools for creating, inspecting and modifying windows lib files"
-documentation = "https://docs.rs/winlib/0.2.0/winlib"
+documentation = "https://docs.rs/winlib/0.2.1/winlib"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/ChrisDenton/winlibtools"
 
