@@ -1,6 +1,10 @@
 [target.x86_64-pc-windows-msvc]
 rustflags = [
     "-Ctarget-feature=+crt-static",
-    "-Clink-arg=ucrt.lib",
+    "-Clink-arg=/DEFAULTLIB:ucrt.lib",
+    "-Clink-arg=/NODEFAULTLIB:libucrt.lib",
     "-Clink-arg=/WX",
+    "-Clink-arg=/MANIFEST:EMBED",
+    "-Clinker=rust-lld",
+    "-Cdebuginfo=full",
 ]
