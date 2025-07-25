@@ -41,7 +41,7 @@ fn create_lib(
     options: &CreateOptions,
 ) -> Result<(), WinlibError> {
     let extracted_lib = options.save_excluded.as_deref();
-    let data = fs::read(&from_lib).map_err(|e| WinlibError::IoError {
+    let data = fs::read(from_lib).map_err(|e| WinlibError::IoError {
         msg: format!("cannot read {}", from_lib.display()),
         cause: e,
     })?;
@@ -70,7 +70,7 @@ fn create_lib(
         if options.exclude_offsets.contains(&(member.file_range().0 as u32)) {
             exclude = true;
         } else if options.exclude_idata {
-            match CoffFile::<_, ImageFileHeader>::parse(&*data) {
+            match CoffFile::<_, ImageFileHeader>::parse(data) {
                 Ok(file) => {
                     let strings = file.coff_symbol_table().strings();
                     for section in file.coff_section_table().iter() {
@@ -89,7 +89,7 @@ fn create_lib(
                     }
                 }
                 Err(e) => {
-                    if let Ok(_) = ImportFile::parse(&*data) {
+                    if ImportFile::parse(data).is_ok() {
                         exclude = true;
                     } else {
                         // maybe we should just warn here?
@@ -138,7 +138,7 @@ fn create_lib(
             msg: "could not create new library file".into(),
             cause: e,
         })?;
-        fs::write(lib, &writer.get_ref()).map_err(|e| WinlibError::IoError {
+        fs::write(lib, writer.get_ref()).map_err(|e| WinlibError::IoError {
             msg: format!("unable to write library to {}", lib.display()),
             cause: e,
         })?;
@@ -158,7 +158,7 @@ fn create_lib(
         msg: "could not create new library file".into(),
         cause: e,
     })?;
-    fs::write(out_lib, &writer.get_ref()).map_err(|e| WinlibError::IoError {
+    fs::write(out_lib, writer.get_ref()).map_err(|e| WinlibError::IoError {
         msg: format!("unable to write library to {}", out_lib.display()),
         cause: e,
     })?;
@@ -167,7 +167,7 @@ fn create_lib(
 }
 
 fn list_lib(lib_path: &OsStr) -> Result<(), WinlibError> {
-    let data = fs::read(&lib_path).map_err(|e| WinlibError::IoError {
+    let data = fs::read(lib_path).map_err(|e| WinlibError::IoError {
         msg: format!("cannot read {}", lib_path.display()),
         cause: e,
     })?;
