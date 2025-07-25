@@ -9,12 +9,19 @@ repository = "https://github.com/ChrisDenton/winlibtools"
 
 [dependencies]
 ar_archive_writer = "0.4.2"
-lexopt = "0.3.1"
+
+[dependencies.clap]
+version = "4.5.41"
+default-features = false
+features = ["std", "help", "suggestions", "usage"]
 
 [dependencies.object]
 version = "0.37.1"
 default-features = false
 features = ["read_core", "archive", "coff", "unaligned"]
+
+[lints.clippy]
+from_str_radix_10 = "allow"
 
 [profile.release]
 lto = "thin"
